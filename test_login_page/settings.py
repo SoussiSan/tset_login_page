@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
+from datetime import timedelta #timedelta is used when you need to represent a duration like: Token expiration , time, Session lifetime , Cache timeout , JWT expiration in DRF , Scheduling tasks
+from dotenv import load_dotenv #to load secret keys from the .env   file
+import os
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,8 +31,29 @@ SECRET_KEY = 'django-insecure-c-)vkt#@7-=@h3q+#yc6llf9d37#&7bzqodjcqojl-ur4bzy9#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]  # all hosts can run our project
+# the configuration for the rest framework
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # Every request to DRF must contain a valid JWT token in the headers
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        #
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        # Only authenticated users can access the API.
+        "rest_framework.permissions.AllowAny",
+    ],
+    'DEFAULT_PARSER_CLASSES': ['rest_framework.parsers.JSONParser'],
+}
 
+# configures JWT tokens
+SIMPLE_JWT = {
+    # this used to access end points After 30 minutes, the access token expires, and the user must use the refresh token to get a new one.
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    # A long-lived token used to generate a new access token when the old one expires.
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
 
 # Application definition
 
@@ -39,6 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'quickstart',
+    'api',# here
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +78,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # here
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'test_login_page.urls'
@@ -117,3 +148,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# here
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWS_CREDENTIALS = True
